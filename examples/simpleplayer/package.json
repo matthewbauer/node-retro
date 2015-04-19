@@ -1,0 +1,20 @@
+{
+  "name": "simpleplayer",
+  "description": "A simple retro player.",
+  "version": "0.1.2",
+  "author": "Matthew Bauer <mjbauer95@gmail.com>",
+  "dependencies": {},
+  "devDependencies": {
+    "nw": "^0.12.1",
+    "request": "^2.55.0",
+    "unzip": "^0.1.11"
+  },
+  "main": "player.html",
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "window": {
+    "frame": true,
+    "toolbar": true
+  }
+}

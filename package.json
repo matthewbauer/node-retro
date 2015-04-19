@@ -1,0 +1,14 @@
+{
+  "name": "node-retro",
+  "description": "Load libretro cores from Node JS",
+  "version": "0.1.2",
+  "author": "Matthew Bauer <mjbauer95@gmail.com>",
+  "dependencies": {},
+  "devDependencies": {
+    "nan": "^1.7.0"
+  },
+  "main": "retro.js",
+  "engines": {
+    "node": ">=0.4.0"
+  }
+}
