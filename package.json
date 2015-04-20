@@ -14,7 +14,7 @@
 	"scripts": {
 		"prepublish": "gulp coffee",
 		"postbuild": "gulp coffee",
-		"install": "nw-gyp configure install --target=0.3.2"
+		"install": "nw-gyp configure build"
 	},
 	"dependencies": {
 		"nan": "^1.7.0",
