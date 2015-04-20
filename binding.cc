@@ -107,8 +107,18 @@ bool Environment_cb(unsigned cmd, void* data) {
       value = NanNew<String>(var->key);
       break;
     }
+    case RETRO_ENVIRONMENT_GET_OVERSCAN:
+    case RETRO_ENVIRONMENT_GET_CAN_DUPE:
+    case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE:
+    case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY:
+    case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
+    case RETRO_ENVIRONMENT_GET_USERNAME:
+    case RETRO_ENVIRONMENT_GET_CORE_ASSETS_DIRECTORY:
+      value = NanNull();
+      break;
     default: {
       value = NanNull();
+      printf("Unhandled environment command %i\n", cmd);
     }
   }
 
@@ -149,7 +159,7 @@ bool Environment_cb(unsigned cmd, void* data) {
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
   size_t pitch) {
-  if (data == NULL) {
+  if (data == NULL || height * pitch == 0) {
     return;
   }
   Local<Value> args[] = {
