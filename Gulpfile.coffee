@@ -1,11 +1,20 @@
 gulp = require('gulp')
-gutil = require('gulp-util')
 coffee = require('gulp-coffee')
 
+paths = {
+  coffee: './src/*.coffee'
+}
+
 gulp.task('coffee', ->
-  gulp.src('./src/*.coffee')
-    .pipe(coffee().on('error', gutil.log))
+  gulp.src(paths.coffee)
+    .pipe(coffee())
     .pipe(gulp.dest('./lib/'))
 )
 
 gulp.task('build', ['coffee'])
+
+gulp.task('watch', ->
+  gulp.watch(paths.coffee, ['coffee'])
+)
+
+gulp.task('default', ['watch'])

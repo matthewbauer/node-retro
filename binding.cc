@@ -159,8 +159,11 @@ bool Environment_cb(unsigned cmd, void* data) {
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
   size_t pitch) {
-  if (data == NULL || height * pitch == 0) {
+  if (data == NULL) {
     return;
+  }
+  if (pitch == 0) {
+    pitch = 4 * width;
   }
   Local<Value> args[] = {
     NanNew<String>("videorefresh"),
