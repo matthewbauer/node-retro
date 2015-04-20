@@ -10,12 +10,12 @@ module.exports = (keyBindings) ->
     switch event.type
       when 'keydown'
         _this.keyboard[event.which] = true
-        if keyBindings[event.which]
+        if event.which of keyBindings
           _this.joypad[keyBindings[event.which]] = true
         event.preventDefault()
       when 'keyup'
         _this.keyboard[event.which] = false
-        if keyBindings[event.which]
+        if event.which of keyBindings
           _this.joypad[keyBindings[event.which]] = false
         event.preventDefault()
 
