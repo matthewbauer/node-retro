@@ -9,7 +9,7 @@ exports.Audio = require('./audio')
 exports.Core = (corefile, audio, input, video) ->
   _this = this
 
-  @libretro = require('./build/Release/retro')
+  @libretro = require('../build/Release/retro')
 
   @listeners = {}
   @overscan = true
