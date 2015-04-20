@@ -1,11 +1,4 @@
-node_modules
 build
-*.js
-*.dylib
-.cores
+node_modules
 lib
-npm-debug.log
-*.dat
-*.gz
-*.csv
-*.log
+*.js
