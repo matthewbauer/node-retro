@@ -1,6 +1,6 @@
-RETRO = require('./constants')
+RETRO = require('./libretro_h')
 
-exports = (context) ->
+module.exports = (context) ->
   _this = this
 
   @batch = (buffer, frames) ->

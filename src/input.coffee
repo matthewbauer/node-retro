@@ -1,13 +1,12 @@
 RETRO = require('./libretro_h')
 
-exports = (keyBindings) ->
+module.exports = (keyBindings) ->
   _this = this
 
   _this.keyboard = _this.joypad = _this.mouse = {}
   _this.lightgun = _this.analog = _this.pointer = {}
 
   @eventHandler = (event) ->
-    console.log(''+event.which)
     switch event.type
       when 'keydown'
         _this.keyboard[event.which] = true
