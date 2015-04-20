@@ -15,7 +15,7 @@ exports.Core = (corefile, audio, input, video) ->
   @overscan = true
   @variables = {}
   @variablesUpdate = false
-  @interval = 10
+  @interval = 20
 
   @setVariable = (key, value) ->
     _this.variables[key] = value
@@ -42,9 +42,14 @@ exports.Core = (corefile, audio, input, video) ->
       when RETRO.ENVIRONMENT_SET_PIXEL_FORMAT
         video.pixelFormat = value
         return true
+      when RETRO.ENVIRONMENT_GET_SYSTEM_DIRECTORY
+        return '.'
       when RETRO.ENVIRONMENT_GET_VARIABLE
         return _this.variables[value]
+      when RETRO.ENVIRONMENT_SET_INPUT_DESCRIPTORS
+        return true
       else
+        console.log('Unknown environment command ' + cmd)
         return false
 
   @on 'log', (level, fmt) -> console.log(fmt)
