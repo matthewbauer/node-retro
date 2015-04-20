@@ -3,3 +3,9 @@ build
 *.js
 *.dylib
 .cores
+lib
+npm-debug.log
+*.dat
+*.gz
+*.csv
+*.log

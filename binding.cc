@@ -10,11 +10,21 @@
 
 #include "./libretro.h"
 
-using namespace v8;
+using v8::Value;
+using v8::Local;
+using v8::String;
+using v8::Function;
+using v8::Object;
+using v8::Number;
+using v8::Handle;
+using v8::Integer;
+using v8::Boolean;
 using namespace node;
 
+// pointer to core
 void* lib_handle;
 
+// core methods, not included in libretro.h?
 void (*pretro_init)(void);
 void (*pretro_deinit)(void);
 unsigned (*pretro_api_version)(void);
@@ -42,8 +52,10 @@ unsigned (*pretro_get_region)(void);
 void *(*pretro_get_memory_data)(unsigned);
 size_t (*pretro_get_memory_size)(unsigned);
 
+// Our only reference to Javascript-land in retro calls
 NanCallback* listener;
 
+// Should this be deferred to Javascript?
 void Log(enum retro_log_level level, const char* fmt, ...) {
   char error[1024];
   va_list argptr;
@@ -56,6 +68,7 @@ void Log(enum retro_log_level level, const char* fmt, ...) {
   listener->Call(3, args);
 }
 
+// Most of this will have to be done in C, but use callback wherever possible
 bool Environment_cb(unsigned cmd, void* data) {
   if (cmd == RETRO_ENVIRONMENT_GET_LOG_INTERFACE) {
     struct retro_log_callback* cb = (struct retro_log_callback*) data;
@@ -131,22 +144,21 @@ bool Environment_cb(unsigned cmd, void* data) {
     }
   }
 
-  return out->BooleanValue();
+  return out->BooleanValue();  // this may run give us problems with nonerrors
 }
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
   size_t pitch) {
-  if (data) {
-    Local<Value> args[] = {
-      NanNew<String>("videorefresh"),
-      NanNewBufferHandle((char*)data, height * pitch),
-      NanNew<Number>(width),
-      NanNew<Number>(height),
-      NanNew<Number>(pitch) };
-    listener->Call(5, args);
-  } else {
-    printf("no data\n");
+  if (data == NULL) {
+    return;
   }
+  Local<Value> args[] = {
+    NanNew<String>("videorefresh"),
+    NanNewBufferHandle((char*)data, height * pitch),
+    NanNew<Number>(width),
+    NanNew<Number>(height),
+    NanNew<Number>(pitch) };
+  listener->Call(5, args);
 }
 
 void AudioSample(int16_t left, int16_t right) {
@@ -159,6 +171,8 @@ void AudioSample(int16_t left, int16_t right) {
 }
 
 size_t AudioSampleBatch(const int16_t* data, size_t frames) {
+  // convert to floats for AudioContext
+  // maybe better to do this in Javascript.
   float* newData = (float*) malloc(frames * 2 * sizeof(float));
   for (size_t i = 0; i < frames * 2; i++) {
     newData[i] = (float)data[i] / 0x8000;
@@ -168,8 +182,7 @@ size_t AudioSampleBatch(const int16_t* data, size_t frames) {
     NanNewBufferHandle((char*)newData, frames * 2 * sizeof(float)),
     NanNew<Number>(frames)
   };
-  Local<Value> out = listener->Call(3, args);
-  return out->Uint32Value();
+  return listener->Call(3, args)->Uint32Value();
 }
 
 void InputPoll() {
@@ -187,8 +200,7 @@ int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
     NanNew<Number>(idx),
     NanNew<Number>(id)
   };
-  Local<Value> out = listener->Call(5, args);
-  return out->Uint32Value();
+  return listener->Call(5, args)->Uint32Value();
 }
 
 NAN_METHOD(Listen) {
@@ -204,9 +216,9 @@ NAN_METHOD(LoadCore) {
   lib_handle = dlopen(*path, RTLD_LAZY);
   SYM(retro_init);
   SYM(retro_deinit);
-  SYM(retro_api_version);
-  SYM(retro_get_system_info);
-  SYM(retro_get_system_av_info);
+  SYM(retro_api_version);  // unused
+  SYM(retro_get_system_info);  // unused
+  SYM(retro_get_system_av_info);  // unused
   SYM(retro_set_environment);
   SYM(retro_set_video_refresh);
   SYM(retro_set_audio_sample);
@@ -216,17 +228,17 @@ NAN_METHOD(LoadCore) {
   SYM(retro_set_controller_port_device);
   SYM(retro_reset);
   SYM(retro_run);
-  SYM(retro_serialize_size);
-  SYM(retro_serialize);
-  SYM(retro_unserialize);
-  SYM(retro_cheat_reset);
-  SYM(retro_cheat_set);
+  SYM(retro_serialize_size);  // unused
+  SYM(retro_serialize);  // unused
+  SYM(retro_unserialize);  // unused
+  SYM(retro_cheat_reset);  // unused
+  SYM(retro_cheat_set);  // unused
   SYM(retro_load_game);
-  SYM(retro_load_game_special);
+  SYM(retro_load_game_special);  // unused
   SYM(retro_unload_game);
-  SYM(retro_get_region);
-  SYM(retro_get_memory_data);
-  SYM(retro_get_memory_size);
+  SYM(retro_get_region);  // unused
+  SYM(retro_get_memory_data);  // unused
+  SYM(retro_get_memory_size);  // unused
   pretro_set_environment(Environment_cb);
   pretro_init();
   pretro_set_video_refresh(VideoRefresh);
@@ -236,8 +248,12 @@ NAN_METHOD(LoadCore) {
   pretro_set_input_state(InputState);
 }
 
-NAN_METHOD(Run) {
+NAN_METHOD(Run) {  // TODO(matthewbauer): lessen overhead of this function
   pretro_run();
+}
+
+NAN_METHOD(Reset) {
+  pretro_reset();
 }
 
 NAN_METHOD(LoadGame) {
@@ -260,6 +276,7 @@ void InitAll(Handle<Object> exports, Handle<Object> module) {
   NODE_SET_METHOD(exports, "loadGame", LoadGame);
   NODE_SET_METHOD(exports, "run", Run);
   NODE_SET_METHOD(exports, "listen", Listen);
+  NODE_SET_METHOD(exports, "reset", Reset);
   NODE_SET_METHOD(exports, "close", Close);
 }
 

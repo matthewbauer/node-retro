@@ -1,12 +1,13 @@
-RETRO = require('./constants')
+RETRO = require('./libretro_h')
 
-module.exports = (keyBindings) ->
+exports = (keyBindings) ->
   _this = this
 
   _this.keyboard = _this.joypad = _this.mouse = {}
   _this.lightgun = _this.analog = _this.pointer = {}
 
   @eventHandler = (event) ->
+    console.log(''+event.which)
     switch event.type
       when 'keydown'
         _this.keyboard[event.which] = true
@@ -34,8 +35,9 @@ module.exports = (keyBindings) ->
       when RETRO.DEVICE_POINTER
         return _this.pointer[id]
 
-  @close = ->
-
   @poll = ->
+    return # polling is handled by webkit
+
+  @close = ->
 
   this

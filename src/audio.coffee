@@ -1,6 +1,6 @@
 RETRO = require('./constants')
 
-module.exports = (context) ->
+exports = (context) ->
   _this = this
 
   @batch = (buffer, frames) ->
@@ -22,6 +22,7 @@ module.exports = (context) ->
     return frames
 
   @sample = (left, right) ->
+    return # TODO: implement single frame sampling
 
   @close = ->
     context.close()

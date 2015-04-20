@@ -1,0 +1,9 @@
+src
+lib/binding
+build
+test
+*.tgz
+npm-debug.log
+.npmignore
+.gitignore
+.tarvis.yml

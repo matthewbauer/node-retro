@@ -1,10 +1,10 @@
 # node-retro JS wrapper
 
-exports.RETRO = RETRO = require('./constants')
+exports.RETRO = RETRO = require('./libretro_h')
 
-exports.WebVideo = require('./webvideo')
-exports.WebInput = require('./webinput')
-exports.WebAudio = require('./webaudio')
+exports.Video = require('./video')
+exports.Input = require('./input')
+exports.Audio = require('./audio')
 
 exports.Core = (corefile, audio, input, video) ->
   _this = this

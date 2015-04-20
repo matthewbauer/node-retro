@@ -77,9 +77,9 @@ module.exports =
   'mtl': [ '3dengine_libretro' ]
   'n64': [ 'mupen64plus_libretro' ]
   'nes': [
+    'quicknes_libretro'
     'fceumm_libretro'
     'nestopia_libretro'
-    'quicknes_libretro'
   ]
   'ngc': [ 'mednafen_ngp_libretro' ]
   'ngp': [ 'mednafen_ngp_libretro' ]
