@@ -1,0 +1,3 @@
+[submodule "examples/vintage"]
+	path = examples/vintage
+	url = https://github.com/matthewbauer/vintage.git
