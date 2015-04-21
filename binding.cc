@@ -125,7 +125,7 @@ bool Environment_cb(unsigned cmd, void* data) {
   Local<Value> args[] = { NanNew<String>("environment"),
     NanNew<Number>(cmd),
     value };
-  Local<Value> out = listener->Call(3, args);
+  Handle<Value> out = listener->Call(3, args);
 
   switch (cmd) {
     case RETRO_ENVIRONMENT_GET_OVERSCAN:
@@ -218,6 +218,7 @@ int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
 
 NAN_METHOD(Listen) {
   listener = new NanCallback(Local<Function>::Cast(args[0]));
+  NanReturnUndefined();
 }
 
 #define SYM(x) { void* func = dlsym(lib_handle, #x); \
@@ -259,14 +260,17 @@ NAN_METHOD(LoadCore) {
   pretro_set_audio_sample_batch(AudioSampleBatch);
   pretro_set_input_poll(InputPoll);
   pretro_set_input_state(InputState);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Run) {  // TODO(matthewbauer): lessen overhead of this function
   pretro_run();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Reset) {
   pretro_reset();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(LoadGame) {
@@ -275,6 +279,7 @@ NAN_METHOD(LoadGame) {
   game.size = Buffer::Length(bufferObj);
   game.data = Buffer::Data(bufferObj);
   pretro_load_game(&game);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Close) {
@@ -282,9 +287,10 @@ NAN_METHOD(Close) {
   pretro_unload_game();
   pretro_deinit();
   dlclose(lib_handle);
+  NanReturnUndefined();
 }
 
-void InitAll(Handle<Object> exports, Handle<Object> module) {
+void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "loadCore", LoadCore);
   NODE_SET_METHOD(exports, "loadGame", LoadGame);
   NODE_SET_METHOD(exports, "run", Run);

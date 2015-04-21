@@ -14,13 +14,19 @@
 	"scripts": {
 		"prepublish": "gulp coffee",
 		"postbuild": "gulp coffee",
-		"install": "nw-gyp configure build"
+		"install": "node-pre-gyp install --fallback-to-build --target=0.3.7 --runtime=node-webkit"
 	},
 	"dependencies": {
-		"nan": "^1.7.0",
-		"nw-gyp": "^0.12.4"
+		"node-pre-gyp": "^0.6.4"
 	},
+	"binary": {
+		"module_name": "retro",
+		"module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
+		"host": ""
+	},
+	"bundledDependencies": ["node-pre-gyp"],
 	"devDependencies": {
+		"nan": "^1.7.0",
 		"coffee-script": "^1.9.2",
 		"gulp": "^3.8.11",
 		"gulp-coffee": "^2.3.1",
