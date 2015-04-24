@@ -230,9 +230,6 @@ NAN_METHOD(LoadCore) {
   lib_handle = dlopen(*path, RTLD_LAZY);
   SYM(retro_init);
   SYM(retro_deinit);
-  SYM(retro_api_version);  // unused
-  SYM(retro_get_system_info);  // unused
-  SYM(retro_get_system_av_info);  // unused
   SYM(retro_set_environment);
   SYM(retro_set_video_refresh);
   SYM(retro_set_audio_sample);
@@ -242,15 +239,18 @@ NAN_METHOD(LoadCore) {
   SYM(retro_set_controller_port_device);
   SYM(retro_reset);
   SYM(retro_run);
+  SYM(retro_load_game);
+  SYM(retro_unload_game);
+  SYM(retro_api_version);
+  SYM(retro_get_system_info);
+  SYM(retro_get_system_av_info);
+  SYM(retro_get_region);
   SYM(retro_serialize_size);  // unused
   SYM(retro_serialize);  // unused
   SYM(retro_unserialize);  // unused
   SYM(retro_cheat_reset);  // unused
   SYM(retro_cheat_set);  // unused
-  SYM(retro_load_game);
   SYM(retro_load_game_special);  // unused
-  SYM(retro_unload_game);
-  SYM(retro_get_region);  // unused
   SYM(retro_get_memory_data);  // unused
   SYM(retro_get_memory_size);  // unused
   pretro_set_environment(Environment_cb);
@@ -271,6 +271,44 @@ NAN_METHOD(Run) {  // TODO(matthewbauer): lessen overhead of this function
 NAN_METHOD(Reset) {
   pretro_reset();
   NanReturnUndefined();
+}
+
+NAN_METHOD(APIVersion) {
+  NanReturnValue(NanNew<Integer>(pretro_api_version()));
+}
+
+NAN_METHOD(GetRegion) {
+  NanReturnValue(NanNew<Number>(pretro_get_region()));
+}
+
+NAN_METHOD(GetSystemInfo) {
+  struct retro_system_info info;
+  pretro_get_system_info(&info);
+  Local<Object> object = NanNew<Object>();
+  object->Set(NanNew<String>("library_name"), NanNew<String>(info.library_name));
+  object->Set(NanNew<String>("library_version"), NanNew<String>(info.library_version));
+  object->Set(NanNew<String>("valid_extensions"), NanNew<String>(info.valid_extensions));
+  object->Set(NanNew<String>("need_fullpath"), NanNew<Boolean>(info.need_fullpath));
+  object->Set(NanNew<String>("block_extract"), NanNew<Number>(info.block_extract));
+  NanReturnValue(object);
+}
+
+NAN_METHOD(GetSystemAVInfo) {
+  struct retro_system_av_info info;
+  pretro_get_system_av_info(&info);
+  Local<Object> timing = NanNew<Object>();
+  timing->Set(NanNew<String>("fps"), NanNew<Number>(info.timing.fps));
+  timing->Set(NanNew<String>("sample_rate"), NanNew<Number>(info.timing.sample_rate));
+  Local<Object> geometry = NanNew<Object>();
+  geometry->Set(NanNew<String>("base_width"), NanNew<Number>(info.geometry.base_width));
+  geometry->Set(NanNew<String>("base_height"), NanNew<Number>(info.geometry.base_height));
+  geometry->Set(NanNew<String>("max_width"), NanNew<Number>(info.geometry.max_width));
+  geometry->Set(NanNew<String>("max_height"), NanNew<Number>(info.geometry.max_height));
+  geometry->Set(NanNew<String>("aspect_ratio"), NanNew<Number>(info.geometry.aspect_ratio));
+  Local<Object> object = NanNew<Object>();
+  object->Set(NanNew<String>("timing"), timing);
+  object->Set(NanNew<String>("geometry"), geometry);
+  NanReturnValue(object);
 }
 
 NAN_METHOD(LoadGame) {
@@ -294,6 +332,10 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "loadCore", LoadCore);
   NODE_SET_METHOD(exports, "loadGame", LoadGame);
   NODE_SET_METHOD(exports, "run", Run);
+  NODE_SET_METHOD(exports, "getSystemInfo", GetSystemInfo);
+  NODE_SET_METHOD(exports, "getSystemAVInfo", GetSystemAVInfo);
+  NODE_SET_METHOD(exports, "api_version", APIVersion);
+  NODE_SET_METHOD(exports, "getRegion", GetRegion);
   NODE_SET_METHOD(exports, "listen", Listen);
   NODE_SET_METHOD(exports, "reset", Reset);
   NODE_SET_METHOD(exports, "close", Close);
