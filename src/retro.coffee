@@ -12,6 +12,8 @@ module.exports.Core = ->
     @listeners[event](args...) if event of @listeners
 
   @loadGame = @libretro.loadGame
+  @loadGamePath = @libretro.loadGamePath
+
   @run = @libretro.run
   @getSystemAVInfo = @libretro.getSystemAVInfo
   @getSystemInfo = @libretro.getSystemInfo

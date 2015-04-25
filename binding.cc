@@ -311,6 +311,22 @@ NAN_METHOD(GetSystemAVInfo) {
   NanReturnValue(object);
 }
 
+NAN_METHOD(LoadGamePath) {
+  NanUtf8String path(args[0]);
+  struct retro_game_info game;
+  game.path = *path;
+  FILE *fp = fopen(game.path, "r");
+  fseek(fp, 0L, SEEK_END);
+  game.size = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+  void *buffer = malloc(game.size);
+  fread(buffer, 1, game.size, fp);
+  game.data = buffer;
+  fclose(fp);
+  pretro_load_game(&game);
+  NanReturnUndefined();
+}
+
 NAN_METHOD(LoadGame) {
   struct retro_game_info game;
   Local<Object> bufferObj = args[0]->ToObject();
@@ -331,6 +347,7 @@ NAN_METHOD(Close) {
 void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "loadCore", LoadCore);
   NODE_SET_METHOD(exports, "loadGame", LoadGame);
+  NODE_SET_METHOD(exports, "loadGamePath", LoadGamePath);
   NODE_SET_METHOD(exports, "run", Run);
   NODE_SET_METHOD(exports, "getSystemInfo", GetSystemInfo);
   NODE_SET_METHOD(exports, "getSystemAVInfo", GetSystemAVInfo);
