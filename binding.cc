@@ -57,6 +57,7 @@ NanCallback* listener;
 
 // Should this be deferred to Javascript?
 void Log(enum retro_log_level level, const char* fmt, ...) {
+  NanScope();
   char error[1024];
   va_list argptr;
   va_start(argptr, fmt);
@@ -70,6 +71,8 @@ void Log(enum retro_log_level level, const char* fmt, ...) {
 
 // Most of this will have to be done in C, but use callback wherever possible
 bool Environment_cb(unsigned cmd, void* data) {
+  NanScope();
+
   if (cmd == RETRO_ENVIRONMENT_GET_LOG_INTERFACE) {
     struct retro_log_callback* cb = (struct retro_log_callback*) data;
     cb->log = Log;
@@ -159,6 +162,7 @@ bool Environment_cb(unsigned cmd, void* data) {
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
   size_t pitch) {
+  NanScope();
   if (data == NULL) {
     return;
   }
@@ -175,6 +179,7 @@ void VideoRefresh(const void *data, unsigned width, unsigned height,
 }
 
 void AudioSample(int16_t left, int16_t right) {
+  NanScope();
   Local<Value> args[] = {
     NanNew<String>("audiosample"),
     NanNew<Number>(left),
@@ -184,6 +189,7 @@ void AudioSample(int16_t left, int16_t right) {
 }
 
 size_t AudioSampleBatch(const int16_t* data, size_t frames) {
+  NanScope();
   // convert to floats for AudioContext
   // maybe better to do this in Javascript.
   float* newData = (float*) malloc(frames * 2 * sizeof(float));
@@ -199,6 +205,7 @@ size_t AudioSampleBatch(const int16_t* data, size_t frames) {
 }
 
 void InputPoll() {
+  NanScope();
   Local<Value> args[] = {
     NanNew<String>("inputpoll")
   };
@@ -206,6 +213,7 @@ void InputPoll() {
 }
 
 int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
+  NanScope();
   Local<Value> args[] = {
     NanNew<String>("inputstate"),
     NanNew<Number>(port),
@@ -217,6 +225,7 @@ int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
 }
 
 NAN_METHOD(Listen) {
+  NanScope();
   listener = new NanCallback(Local<Function>::Cast(args[0]));
   NanReturnUndefined();
 }
@@ -226,6 +235,7 @@ NAN_METHOD(Listen) {
   if (p##x == NULL) { } }
 
 NAN_METHOD(LoadCore) {
+  NanScope();
   NanUtf8String path(args[0]);
   lib_handle = dlopen(*path, RTLD_LAZY);
   SYM(retro_init);
@@ -245,14 +255,14 @@ NAN_METHOD(LoadCore) {
   SYM(retro_get_system_info);
   SYM(retro_get_system_av_info);
   SYM(retro_get_region);
-  SYM(retro_serialize_size);  // unused
-  SYM(retro_serialize);  // unused
-  SYM(retro_unserialize);  // unused
+  SYM(retro_serialize_size);
+  SYM(retro_serialize);
+  SYM(retro_unserialize);
   SYM(retro_cheat_reset);  // unused
   SYM(retro_cheat_set);  // unused
   SYM(retro_load_game_special);  // unused
-  SYM(retro_get_memory_data);  // unused
-  SYM(retro_get_memory_size);  // unused
+  SYM(retro_get_memory_data);
+  SYM(retro_get_memory_size);
   pretro_set_environment(Environment_cb);
   pretro_init();
   pretro_set_video_refresh(VideoRefresh);
@@ -264,24 +274,29 @@ NAN_METHOD(LoadCore) {
 }
 
 NAN_METHOD(Run) {  // TODO(matthewbauer): lessen overhead of this function
+  NanScope();
   pretro_run();
   NanReturnUndefined();
 }
 
 NAN_METHOD(Reset) {
+  NanScope();
   pretro_reset();
   NanReturnUndefined();
 }
 
 NAN_METHOD(APIVersion) {
+  NanScope();
   NanReturnValue(NanNew<Integer>(pretro_api_version()));
 }
 
 NAN_METHOD(GetRegion) {
+  NanScope();
   NanReturnValue(NanNew<Number>(pretro_get_region()));
 }
 
 NAN_METHOD(GetSystemInfo) {
+  NanScope();
   struct retro_system_info info;
   pretro_get_system_info(&info);
   Local<Object> object = NanNew<Object>();
@@ -294,6 +309,7 @@ NAN_METHOD(GetSystemInfo) {
 }
 
 NAN_METHOD(GetSystemAVInfo) {
+  NanScope();
   struct retro_system_av_info info;
   pretro_get_system_av_info(&info);
   Local<Object> timing = NanNew<Object>();
@@ -312,6 +328,7 @@ NAN_METHOD(GetSystemAVInfo) {
 }
 
 NAN_METHOD(LoadGamePath) {
+  NanScope();
   NanUtf8String path(args[0]);
   struct retro_game_info game;
   game.path = *path;
@@ -328,6 +345,7 @@ NAN_METHOD(LoadGamePath) {
 }
 
 NAN_METHOD(LoadGame) {
+  NanScope();
   struct retro_game_info game;
   Local<Object> bufferObj = args[0]->ToObject();
   game.size = Buffer::Length(bufferObj);
@@ -337,11 +355,48 @@ NAN_METHOD(LoadGame) {
 }
 
 NAN_METHOD(Close) {
+  NanScope();
   delete listener;
   pretro_unload_game();
   pretro_deinit();
   dlclose(lib_handle);
   NanReturnUndefined();
+}
+
+NAN_METHOD(GetMemoryData) {
+  NanScope();
+  int id = args[0]->IntegerValue();
+  size_t size = pretro_get_memory_size(id);
+  void* memory = pretro_get_memory_data(id);
+  NanReturnValue(NanNewBufferHandle((char*)memory, size));
+}
+
+NAN_METHOD(SetMemoryData) {
+  NanScope();
+  int id = args[0]->IntegerValue();
+  Local<Object> buffer = args[1]->ToObject();
+  size_t size = pretro_get_memory_size(id);
+  void* memory = pretro_get_memory_data(id);
+  memcpy(memory, Buffer::Data(buffer), size);
+  NanReturnUndefined();
+}
+
+NAN_METHOD(Serialize) {
+  NanScope();
+  size_t size = pretro_serialize_size();
+  void* memory = malloc(size);
+  if (pretro_serialize(memory, size)) {
+    NanReturnValue(NanNewBufferHandle((char*)memory, size));
+  } else {
+    NanReturnUndefined();
+  }
+}
+
+NAN_METHOD(Unserialize) {
+  NanScope();
+  Local<Object> buffer = args[0]->ToObject();
+  bool result = pretro_unserialize((void*)Buffer::Data(buffer), Buffer::Length(buffer));
+  NanReturnValue(NanNew<Boolean>(result));
 }
 
 void InitAll(Handle<Object> exports) {
@@ -351,6 +406,10 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "run", Run);
   NODE_SET_METHOD(exports, "getSystemInfo", GetSystemInfo);
   NODE_SET_METHOD(exports, "getSystemAVInfo", GetSystemAVInfo);
+  NODE_SET_METHOD(exports, "getMemoryData", GetMemoryData);
+  NODE_SET_METHOD(exports, "setMemoryData", SetMemoryData);
+  NODE_SET_METHOD(exports, "unserialize", Unserialize);
+  NODE_SET_METHOD(exports, "serialize", Serialize);
   NODE_SET_METHOD(exports, "api_version", APIVersion);
   NODE_SET_METHOD(exports, "getRegion", GetRegion);
   NODE_SET_METHOD(exports, "listen", Listen);

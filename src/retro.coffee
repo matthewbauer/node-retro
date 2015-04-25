@@ -20,6 +20,10 @@ module.exports.Core = ->
   @reset = @libretro.reset
   @getRegion = @libretro.getRegion
   @api_version = @libretro.api_version
+  @getMemoryData = @libretro.getMemoryData
+  @setMemoryData = @libretro.setMemoryData
+  @serialize = @libretro.serialize
+  @unserialize = @libretro.unserialize
 
   @close = =>
     @listeners = {}
