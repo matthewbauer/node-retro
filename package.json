@@ -14,7 +14,7 @@
 	"scripts": {
 		"prepublish": "gulp prepublish",
 		"postbuild": "gulp coffee",
-		"install": "gulp binding",
+		"install": "node-pre-gyp configure build --runtime=node-webkit --target=0.12.1",
 		"test": "gulp test"
 	},
 	"dependencies": {
