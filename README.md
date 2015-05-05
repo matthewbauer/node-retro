@@ -1,1 +1,4 @@
-Use node-retro to run libretro cores from within node. An example app is provided under examples/simpleplayer that should illustrate how it is done.
+node-retro
+==========
+
+Use node-retro to run libretro cores from within node. This is used by gametime-player to load cores for emulation.
