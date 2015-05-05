@@ -2,8 +2,12 @@
 
 module.exports = require('./libretro_h')
 
+binary = require('node-pre-gyp')
+path = require('path')
+libretro_path = binary.find(path.resolve(path.join(__dirname,'./package.json')))
+
 module.exports.Core = ->
-  @libretro = require('../build/Release/retro')
+  @libretro = require(libretro_path)
 
   @listeners = {}
   @on = (event, cb) => @listeners[event] = cb

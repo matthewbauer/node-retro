@@ -1,4 +1,4 @@
-retro = require('../lib/retro')
+retro = require('./retro.js')
 should = require('should')
 
 describe 'loading a core', ->

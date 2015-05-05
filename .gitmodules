@@ -1,3 +1,0 @@
-[submodule "player"]
-	path = examples/player
-	url = https://github.com/matthewbauer/gametime-player.git

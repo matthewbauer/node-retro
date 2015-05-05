@@ -1,20 +1,18 @@
+require('coffee-script/register')
+
 gulp = require('gulp')
 coffee = require('gulp-coffee')
 mocha = require('gulp-mocha')
 shell = require('gulp-shell')
 
-paths = {
-  coffee: './src/*.coffee'
-}
-
 gulp.task('coffee', ->
-  gulp.src(paths.coffee)
+  gulp.src(['retro.coffee', 'libretro_h.coffee'])
     .pipe(coffee())
-    .pipe(gulp.dest('./lib/'))
+    .pipe(gulp.dest('.'))
 )
 
 gulp.task('mocha', ->
-  gulp.src(['test/test*.coffee'], { read: false })
+  gulp.src(['test.coffee'], { read: false })
       .pipe(mocha({
         reporter: 'spec',
         globals: {
@@ -27,12 +25,14 @@ gulp.task('watch', ->
 )
 
 gulp.task('gyp', shell.task([
-  'node-pre-gyp install --fallback-to-build --target=0.12.1 --runtime=node-webkit'
+  './node_modules/node-pre-gyp/bin/node-pre-gyp configure build --runtime=node-webkit --target=0.12.1'
+  './node_modules/node-pre-gyp/bin/node-pre-gyp configure build --runtime=node'
 ]))
 
 gulp.task('build', ['gyp', 'coffee'])
 gulp.task('test', ['mocha'])
 gulp.task('prebuild', ['coffee'])
 gulp.task('prepublish', ['coffee'])
+gulp.task('binding', ['gyp'])
 
 gulp.task('default', ['build', 'test'])
