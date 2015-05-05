@@ -15,6 +15,8 @@ module.exports.Core = ->
   @loadGamePath = @libretro.loadGamePath
 
   @run = @libretro.run
+  @play = @libretro.play
+  @stop = @libretro.stop
   @getSystemAVInfo = @libretro.getSystemAVInfo
   @getSystemInfo = @libretro.getSystemInfo
   @reset = @libretro.reset

@@ -273,9 +273,32 @@ NAN_METHOD(LoadCore) {
   NanReturnUndefined();
 }
 
-NAN_METHOD(Run) {  // TODO(matthewbauer): lessen overhead of this function
+NAN_METHOD(Run) {
   NanScope();
   pretro_run();
+  NanReturnUndefined();
+}
+
+static bool stop;
+
+int run_iterate() {
+  if (stop) {
+    return -1;
+  }
+  pretro_run();
+  return 0;
+}
+
+NAN_METHOD(Stop) {
+  NanScope();
+  stop = true;
+  NanReturnUndefined();
+}
+
+NAN_METHOD(Play) {
+  NanScope();
+  stop = false;
+  while(run_iterate() != -1);
   NanReturnUndefined();
 }
 
@@ -415,6 +438,8 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "listen", Listen);
   NODE_SET_METHOD(exports, "reset", Reset);
   NODE_SET_METHOD(exports, "close", Close);
+  NODE_SET_METHOD(exports, "play", Play);
+  NODE_SET_METHOD(exports, "stop", Stop);
 }
 
 NODE_MODULE(addon, InitAll)
