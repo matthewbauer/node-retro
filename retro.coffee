@@ -1,23 +1,19 @@
 # node-retro JS wrapper
+module.exports = require './libretro_h'
+binary = require 'node-pre-gyp'
+path = require 'path'
 
-module.exports = require('./libretro_h')
-
-binary = require('node-pre-gyp')
-path = require('path')
-libretro_path = binary.find(path.resolve(path.join(__dirname,'./package.json')))
+libretro_path = binary.find path.resolve(path.join(__dirname, 'package.json'))
 
 module.exports.Core = ->
-  @libretro = require(libretro_path)
-
+  @libretro = require libretro_path
   @listeners = {}
-  @on = (event, cb) => @listeners[event] = cb
 
-  @emit = (event, args...) =>
-    @listeners[event](args...) if event of @listeners
+  @on = (event, cb) -> @listeners[event] = cb
+  @emit = (event, args...) -> @listeners[event] args...
 
   @loadGame = @libretro.loadGame
   @loadGamePath = @libretro.loadGamePath
-
   @run = @libretro.run
   @play = @libretro.play
   @stop = @libretro.stop
@@ -31,12 +27,12 @@ module.exports.Core = ->
   @serialize = @libretro.serialize
   @unserialize = @libretro.unserialize
 
-  @close = =>
+  @close = ->
     @listeners = {}
     @libretro.close()
 
-  @loadCore = (corefile) =>
-    @libretro.listen(@emit)
-    @libretro.loadCore(corefile)
+  @loadCore = (corefile) ->
+    @libretro.listen @emit
+    @libretro.loadCore corefile
 
   @

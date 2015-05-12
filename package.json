@@ -1,47 +1,47 @@
 {
-	"name": "node-retro",
-	"description": "Load libretro cores within Javascript.",
-	"version": "0.3.3",
-	"author": "Matthew Bauer <mjbauer95@gmail.com>",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/matthewbauer/node-retro.git"
-	},
-	"main": "retro.js",
-	"engines": {
-		"node": ">=0.8.0"
-	},
-	"scripts": {
-		"prepublish": "gulp prepublish",
-		"postbuild": "gulp coffee",
-		"install": "node-pre-gyp configure build --runtime=node-webkit --target=0.12.1",
-		"test": "gulp test"
-	},
-	"dependencies": {
-		"node-pre-gyp": "^0.6.4",
-		"nan": "^1.7.0"
-	},
-	"binary": {
-		"module_name": "retro",
-		"module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
-		"host": ""
-	},
-	"bundledDependencies": [
-		"node-pre-gyp"
-	],
-	"devDependencies": {
-		"coffee-script": "^1.9.2",
-		"gulp": "^3.8.11",
-		"gulp-coffee": "^2.3.1",
-		"gulp-mocha": "^2.0.1",
-		"gulp-shell": "^0.4.1",
-		"gulp-util": "^3.0.4",
-		"should": "^6.0.1"
-	},
-	"keywords": [
-		"emulation",
-		"libretro",
-		"games",
-		"bindings"
-	]
+  "name": "node-retro",
+  "description": "Load libretro cores within Javascript.",
+  "version": "0.4.0",
+  "author": "Matthew Bauer <mjbauer95@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthewbauer/node-retro.git"
+  },
+  "main": "retro.js",
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "scripts": {
+    "prepublish": "gulp prepublish",
+    "postbuild": "gulp coffee",
+    "install": "node-pre-gyp configure build --runtime=node-webkit --target=0.12.1",
+    "test": "gulp test"
+  },
+  "dependencies": {
+    "node-pre-gyp": "^0.6.4",
+    "nan": "^1.7.0"
+  },
+  "binary": {
+    "module_name": "retro",
+    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
+    "host": ""
+  },
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
+  "devDependencies": {
+    "coffee-script": "^1.9.2",
+    "gulp": "^3.8.11",
+    "gulp-coffee": "^2.3.1",
+    "gulp-mocha": "^2.0.1",
+    "gulp-shell": "^0.4.1",
+    "gulp-util": "^3.0.4",
+    "should": "^6.0.1"
+  },
+  "keywords": [
+    "emulation",
+    "libretro",
+    "games",
+    "bindings"
+  ]
 }
