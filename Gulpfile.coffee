@@ -14,12 +14,8 @@ gulp.task 'mocha', ->
     globals:
       should: require 'should'
 
-gulp.task 'gyp', shell.task [
-  './node_modules/node-pre-gyp/bin/node-pre-gyp configure build'
-]
-gulp.task 'build', ['gyp', 'coffee']
+gulp.task 'build', ['coffee']
 gulp.task 'test', ['mocha']
 gulp.task 'prebuild', ['coffee']
 gulp.task 'prepublish', ['coffee']
-gulp.task 'binding', ['gyp']
 gulp.task 'default', ['build', 'test']
