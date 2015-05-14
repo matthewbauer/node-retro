@@ -1,38 +1,66 @@
 # node-retro JS wrapper
 module.exports = require './libretro_h'
+
+os = require 'os'
+fs = require 'fs'
+path = require 'path'
+url = require 'url'
+
 binary = require 'node-pre-gyp'
 path = require 'path'
+{EventEmitter} = require 'events'
 
-libretro_path = binary.find path.resolve(path.join(__dirname, 'package.json'))
+request = require 'request'
+unzip = require 'unzip'
 
-module.exports.Core = ->
-  @libretro = require libretro_path
-  @listeners = {}
+libretro_path = binary.find path.resolve path.join(__dirname, 'package.json')
+module.exports.Core = class Core extends EventEmitter
+  @listeners: {}
+  constructor: (@core) ->
+    libretro = require libretro_path
+    @on 'newListener', (event, listener) ->
+      @listeners[event] = listener
+    libretro.listen (event, args...) =>
+      @listeners[event](args) if event of @listeners
+    libretro.loadCore @core
+    {@loadGame, @loadGamePath, @run, @getSystemAVInfo,
+    @getSystemInfo, @reset, @getRegion, @api_version,
+    @serialize, @unserialize, @close} = libretro
 
-  @on = (event, cb) -> @listeners[event] = cb
-  @emit = (event, args...) -> @listeners[event] args...
-
-  @loadGame = @libretro.loadGame
-  @loadGamePath = @libretro.loadGamePath
-  @run = @libretro.run
-  @play = @libretro.play
-  @stop = @libretro.stop
-  @getSystemAVInfo = @libretro.getSystemAVInfo
-  @getSystemInfo = @libretro.getSystemInfo
-  @reset = @libretro.reset
-  @getRegion = @libretro.getRegion
-  @api_version = @libretro.api_version
-  @getMemoryData = @libretro.getMemoryData
-  @setMemoryData = @libretro.setMemoryData
-  @serialize = @libretro.serialize
-  @unserialize = @libretro.unserialize
-
-  @close = ->
-    @listeners = {}
-    @libretro.close()
-
-  @loadCore = (corefile) ->
-    @libretro.listen @emit
-    @libretro.loadCore corefile
-
-  @
+module.exports.getCore = (core) ->
+  new Promise (resolve, reject) ->
+    if process.platform is 'win32'
+      corefile = "#{core}.dll"
+    else if process.platform is 'darwin'
+      corefile = "#{core}.dylib"
+    else
+      corefile = "#{core}.so"
+    corepath = path.join os.tmpdir(), corefile
+    if fs.existsSync corepath
+      resolve new Core corepath
+    else
+      platform = switch process.platform
+        when 'win32'
+          if process.arch is 'ia32'
+            'win-x86'
+          else
+            'win-x86_64'
+        when 'darwin'
+          if process.arch is 'ia32'
+            'osx-x86'
+          else
+            'osx-x86_64'
+        else 'linux/x86_64'
+      request "http://buildbot.libretro.com/nightly/#{platform}/latest/#{corefile}.zip"
+      .pipe unzip.Parse()
+      .on 'entry', (entry) ->
+        if entry.type is 'File' and entry.path is corefile
+          entry
+          .pipe fs.createWriteStream corepath
+          .on 'error', reject
+          .on 'close', ->
+            resolve new Core corepath
+        else
+          entry.autodrain()
+      .on 'error', reject
+      .on 'close', reject

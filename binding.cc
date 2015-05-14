@@ -121,7 +121,6 @@ bool Environment_cb(unsigned cmd, void* data) {
       break;
     default: {
       value = NanNull();
-      printf("Unhandled environment command %i\n", cmd);
     }
   }
 
@@ -135,7 +134,7 @@ bool Environment_cb(unsigned cmd, void* data) {
     case RETRO_ENVIRONMENT_GET_CAN_DUPE:
     case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE: {
       *(bool*)data = out->BooleanValue();
-      break;
+      return out->BooleanValue();
     }
     case RETRO_ENVIRONMENT_GET_VARIABLE: {
       struct retro_variable *var = (struct retro_variable*)data;
@@ -157,7 +156,7 @@ bool Environment_cb(unsigned cmd, void* data) {
     }
   }
 
-  return out->BooleanValue();  // this may run give us problems with nonerrors
+  return true;  // this may run give us problems with nonerrors
 }
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
@@ -261,8 +260,9 @@ NAN_METHOD(LoadCore) {
   SYM(retro_cheat_reset);  // unused
   SYM(retro_cheat_set);  // unused
   SYM(retro_load_game_special);  // unused
-  SYM(retro_get_memory_data);
-  SYM(retro_get_memory_size);
+  SYM(retro_get_memory_data); // unused
+  SYM(retro_get_memory_size); // unused
+
   pretro_set_environment(Environment_cb);
   pretro_init();
   pretro_set_video_refresh(VideoRefresh);
@@ -276,29 +276,6 @@ NAN_METHOD(LoadCore) {
 NAN_METHOD(Run) {
   NanScope();
   pretro_run();
-  NanReturnUndefined();
-}
-
-static bool stop;
-
-int run_iterate() {
-  if (stop) {
-    return -1;
-  }
-  pretro_run();
-  return 0;
-}
-
-NAN_METHOD(Stop) {
-  NanScope();
-  stop = true;
-  NanReturnUndefined();
-}
-
-NAN_METHOD(Play) {
-  NanScope();
-  stop = false;
-  while(run_iterate() != -1);
   NanReturnUndefined();
 }
 
@@ -386,24 +363,6 @@ NAN_METHOD(Close) {
   NanReturnUndefined();
 }
 
-NAN_METHOD(GetMemoryData) {
-  NanScope();
-  int id = args[0]->IntegerValue();
-  size_t size = pretro_get_memory_size(id);
-  void* memory = pretro_get_memory_data(id);
-  NanReturnValue(NanNewBufferHandle((char*)memory, size));
-}
-
-NAN_METHOD(SetMemoryData) {
-  NanScope();
-  int id = args[0]->IntegerValue();
-  Local<Object> buffer = args[1]->ToObject();
-  size_t size = pretro_get_memory_size(id);
-  void* memory = pretro_get_memory_data(id);
-  memcpy(memory, Buffer::Data(buffer), size);
-  NanReturnUndefined();
-}
-
 NAN_METHOD(Serialize) {
   NanScope();
   size_t size = pretro_serialize_size();
@@ -429,8 +388,6 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "run", Run);
   NODE_SET_METHOD(exports, "getSystemInfo", GetSystemInfo);
   NODE_SET_METHOD(exports, "getSystemAVInfo", GetSystemAVInfo);
-  NODE_SET_METHOD(exports, "getMemoryData", GetMemoryData);
-  NODE_SET_METHOD(exports, "setMemoryData", SetMemoryData);
   NODE_SET_METHOD(exports, "unserialize", Unserialize);
   NODE_SET_METHOD(exports, "serialize", Serialize);
   NODE_SET_METHOD(exports, "api_version", APIVersion);
@@ -438,8 +395,6 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "listen", Listen);
   NODE_SET_METHOD(exports, "reset", Reset);
   NODE_SET_METHOD(exports, "close", Close);
-  NODE_SET_METHOD(exports, "play", Play);
-  NODE_SET_METHOD(exports, "stop", Stop);
 }
 
 NODE_MODULE(addon, InitAll)

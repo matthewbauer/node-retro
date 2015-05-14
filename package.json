@@ -10,8 +10,7 @@
   "main": "retro.js",
   "scripts": {
     "prepublish": "gulp prepublish",
-    "postbuild": "gulp coffee",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "gulp install",
     "test": "gulp test"
   },
   "dependencies": {
@@ -33,7 +32,9 @@
     "gulp-mocha": "^2.0.1",
     "gulp-shell": "^0.4.1",
     "gulp-util": "^3.0.4",
-    "should": "^6.0.1"
+    "request": "^2.55.0",
+    "should": "^6.0.1",
+    "unzip": "^0.1.11"
   },
   "keywords": [
     "emulation",
