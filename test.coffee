@@ -41,5 +41,3 @@ for name, info of cores
       info.timing.sample_rate.should.be.a.Number
     it 'core.getRegion()', ->
       core.getRegion().should.be.within 0, 1
-    after ->
-      core.close()

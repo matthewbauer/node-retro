@@ -21,9 +21,6 @@ using v8::Integer;
 using v8::Boolean;
 using namespace node;
 
-// pointer to core
-void* lib_handle;
-
 // core methods, not included in libretro.h?
 void (*pretro_init)(void);
 void (*pretro_deinit)(void);
@@ -229,14 +226,18 @@ NAN_METHOD(Listen) {
   NanReturnUndefined();
 }
 
-#define SYM(x) { void* func = dlsym(lib_handle, #x); \
-  memcpy(&p##x, &func, sizeof(func)); \
-  if (p##x == NULL) { } }
+#define SYM(symbol) uv_dlsym(libretro, #symbol, (void**) &p##symbol);
 
 NAN_METHOD(LoadCore) {
   NanScope();
   NanUtf8String path(args[0]);
-  lib_handle = dlopen(*path, RTLD_LAZY);
+
+  uv_lib_t *libretro = (uv_lib_t*) malloc(sizeof(uv_lib_t));
+  if (uv_dlopen(*path, libretro)) {
+    fprintf(stderr, "dlsym error: %s\n", uv_dlerror(libretro));
+    return;
+  }
+
   SYM(retro_init);
   SYM(retro_deinit);
   SYM(retro_set_environment);
@@ -354,15 +355,6 @@ NAN_METHOD(LoadGame) {
   NanReturnUndefined();
 }
 
-NAN_METHOD(Close) {
-  NanScope();
-  delete listener;
-  pretro_unload_game();
-  pretro_deinit();
-  dlclose(lib_handle);
-  NanReturnUndefined();
-}
-
 NAN_METHOD(Serialize) {
   NanScope();
   size_t size = pretro_serialize_size();
@@ -394,7 +386,6 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "getRegion", GetRegion);
   NODE_SET_METHOD(exports, "listen", Listen);
   NODE_SET_METHOD(exports, "reset", Reset);
-  NODE_SET_METHOD(exports, "close", Close);
 }
 
 NODE_MODULE(addon, InitAll)

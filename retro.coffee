@@ -16,16 +16,18 @@ unzip = require 'unzip'
 libretro_path = binary.find path.resolve path.join(__dirname, 'package.json')
 module.exports.Core = class Core extends EventEmitter
   @listeners: {}
+  @cache: {}
   constructor: (@core) ->
     libretro = require libretro_path
     @on 'newListener', (event, listener) ->
       @listeners[event] = listener
     libretro.listen (event, args...) =>
+      #@emit event, args
       @listeners[event](args) if event of @listeners
     libretro.loadCore @core
     {@loadGame, @loadGamePath, @run, @getSystemAVInfo,
     @getSystemInfo, @reset, @getRegion, @api_version,
-    @serialize, @unserialize, @close} = libretro
+    @serialize, @unserialize} = libretro
 
 module.exports.getCore = (core) ->
   new Promise (resolve, reject) ->
