@@ -4,9 +4,10 @@ should = require 'should'
 cores =
   snes9x_libretro:
     library_name: 'Snes9X'
+    can_run: false
   dinothawr_libretro:
     library_name: 'Dinothawr'
-
+    can_run: true
 for name, info of cores
   describe "retro.getCore('#{name}')", ->
     core = null
@@ -16,6 +17,9 @@ for name, info of cores
       retro.getCore(corename).then (c) ->
         core = c
         done()
+    if coreinfo.can_run
+      it 'core.run()', ->
+        core.run()
     it "core should exist", ->
       core.should.exist
     it 'core.api_version() == 1', ->

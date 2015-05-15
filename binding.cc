@@ -153,7 +153,7 @@ bool Environment_cb(unsigned cmd, void* data) {
     }
   }
 
-  return true;  // this may run give us problems with nonerrors
+  return true;
 }
 
 void VideoRefresh(const void *data, unsigned width, unsigned height,
@@ -226,7 +226,10 @@ NAN_METHOD(Listen) {
   NanReturnUndefined();
 }
 
-#define SYM(symbol) uv_dlsym(libretro, #symbol, (void**) &p##symbol);
+#define SYM(symbol) if (uv_dlsym(libretro, #symbol, (void**) &p##symbol)) { \
+  fprintf(stderr, "dlsym error: %s\n", uv_dlerror(libretro)); \
+  return; \
+}
 
 NAN_METHOD(LoadCore) {
   NanScope();
