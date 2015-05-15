@@ -17,7 +17,7 @@ libretro_path = binary.find path.resolve path.join(__dirname, 'package.json')
 module.exports.Core = class Core extends EventEmitter
   listeners: {}
   buffer: {}
-  constructor: (@core) ->
+  constructor: (@file) ->
     libretro = require libretro_path
     @on 'newListener', (event, listener) ->
       if event of @buffer
@@ -28,10 +28,10 @@ module.exports.Core = class Core extends EventEmitter
       return @listeners[event] args... if event of @listeners
       @buffer[event] ?= []
       @buffer[event].push args
-    libretro.loadCore @core
+    libretro.loadCore @file
     {@loadGame, @loadGamePath, @run, @getSystemAVInfo,
     @getSystemInfo, @reset, @getRegion, @api_version,
-    @serialize, @unserialize} = libretro
+    @serialize, @unserialize, @start, @stop} = libretro
 
 module.exports.getCore = (core) ->
   new Promise (resolve, reject) ->
