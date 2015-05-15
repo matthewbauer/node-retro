@@ -7,7 +7,7 @@ cores =
     can_run: false
   dinothawr_libretro:
     library_name: 'Dinothawr'
-    can_run: true
+    can_run: false
 for name, info of cores
   describe "retro.getCore('#{name}')", ->
     core = null
