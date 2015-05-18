@@ -30,6 +30,7 @@
     "node-pre-gyp"
   ],
   "devDependencies": {
+    "aws-sdk": "^2.1.29",
     "coffee-script": "^1.9.2",
     "gametime-nointro": "^0.5.1",
     "gulp": "^3.8.11",
