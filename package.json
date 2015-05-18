@@ -23,7 +23,8 @@
   "binary": {
     "module_name": "retro",
     "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
-    "host": ""
+    "host": "https://node-retro.s3-website-us-west-2.amazonaws.com",
+    "remote_path": "./{name}/v{version}"
   },
   "bundledDependencies": [
     "node-pre-gyp"
