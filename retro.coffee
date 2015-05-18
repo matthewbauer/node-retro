@@ -31,7 +31,8 @@ module.exports.Core = class Core extends EventEmitter
     libretro.loadCore @file
     {@loadGame, @loadGamePath, @run, @getSystemAVInfo,
     @getSystemInfo, @reset, @getRegion, @api_version,
-    @serialize, @unserialize, @start, @stop} = libretro
+    @serialize, @unserialize, @start, @stop,
+    @unloadGame} = libretro
 
 module.exports.getCore = (core) ->
   new Promise (resolve, reject) ->
@@ -63,10 +64,8 @@ module.exports.getCore = (core) ->
         if entry.type is 'File' and entry.path is corefile
           entry
           .pipe fs.createWriteStream corepath
-          .on 'error', reject
           .on 'close', ->
             resolve new Core corepath
         else
           entry.autodrain()
-      .on 'error', reject
       .on 'close', reject

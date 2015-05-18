@@ -10,9 +10,11 @@
 
 #include "./libretro.h"
 
+using v8::Isolate;
 using v8::Value;
 using v8::Local;
 using v8::String;
+using v8::ArrayBuffer;
 using v8::Function;
 using v8::Object;
 using v8::Number;
@@ -52,6 +54,9 @@ size_t (*pretro_get_memory_size)(unsigned);
 // Our only reference to Javascript-land in retro calls
 NanCallback* listener;
 
+// bytes for video
+int bytes_per_pixel = 2;
+
 // Should this be deferred to Javascript?
 void Log(enum retro_log_level level, const char* fmt, ...) {
   char error[1024];
@@ -59,16 +64,18 @@ void Log(enum retro_log_level level, const char* fmt, ...) {
   va_start(argptr, fmt);
   vsnprintf(error, sizeof(error), fmt, argptr);
   va_end(argptr);
-  Local<Value> args[] = { NanNew<String>("log"),
-    NanNew<Number>(level),
-    NanNew<String>(error) };
+  Local<Value> args[] = {
+    NanNew("log"),
+    NanNew(level),
+    NanNew(error)
+  };
   listener->Call(3, args);
 }
 
 // Most of this will have to be done in C, but use JS callback wherever possible
 bool Environment_cb(unsigned cmd, void* data) {
   if (cmd == RETRO_ENVIRONMENT_GET_LOG_INTERFACE) {
-    struct retro_log_callback* cb = (struct retro_log_callback*) data;
+    struct retro_log_callback* cb = reinterpret_cast<struct retro_log_callback*>(data);
     cb->log = Log;
     return true;
   }
@@ -77,31 +84,31 @@ bool Environment_cb(unsigned cmd, void* data) {
 
   switch (cmd) {
     case RETRO_ENVIRONMENT_SET_VARIABLES: {
-      const struct retro_variable* vars = (const struct retro_variable*) data;
+      const struct retro_variable* vars = reinterpret_cast<const struct retro_variable*>(data);
       Local<Object> settings = NanNew<Object>();
       for (const struct retro_variable* var = vars;
         var->key && var->value; var++) {
-        settings->Set(NanNew<String>(var->key), NanNew<String>(var->value));
+        settings->Set(NanNew(var->key), NanNew(var->value));
       }
       value = settings;
       break;
     }
     case RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL: {
-      value = NanNew<Number>(*(const unsigned*)data);
+      value = NanNew(*reinterpret_cast<const unsigned*>(data));
       break;
     }
     case RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME: {
-      value = NanNew<Boolean>(*(const bool*)data);
+      value = NanNew(*reinterpret_cast<const bool*>(data));
       break;
     }
     case RETRO_ENVIRONMENT_SET_PIXEL_FORMAT: {
-      enum retro_pixel_format pix_fmt = *(const enum retro_pixel_format*)data;
-      value = NanNew<Number>(pix_fmt);
+      enum retro_pixel_format pix_fmt = *reinterpret_cast<const enum retro_pixel_format*>(data);
+      value = NanNew(pix_fmt);
       break;
     }
     case RETRO_ENVIRONMENT_GET_VARIABLE: {
-      struct retro_variable* var = (struct retro_variable*)data;
-      value = NanNew<String>(var->key);
+      struct retro_variable* var = reinterpret_cast<struct retro_variable*>(data);
+      value = NanNew(var->key);
       break;
     }
     case RETRO_ENVIRONMENT_GET_OVERSCAN:
@@ -118,22 +125,24 @@ bool Environment_cb(unsigned cmd, void* data) {
     }
   }
 
-  Local<Value> args[] = { NanNew<String>("environment"),
-    NanNew<Number>(cmd),
-    value };
+  Local<Value> args[] = {
+    NanNew("environment"),
+    NanNew(cmd),
+    value
+  };
   Handle<Value> out = listener->Call(3, args);
 
   switch (cmd) {
     case RETRO_ENVIRONMENT_GET_OVERSCAN:
     case RETRO_ENVIRONMENT_GET_CAN_DUPE:
     case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE: {
-      *(bool*)data = out->BooleanValue();
+      *reinterpret_cast<bool*>(data) = out->BooleanValue();
       return out->BooleanValue();
     }
     case RETRO_ENVIRONMENT_GET_VARIABLE: {
-      struct retro_variable *var = (struct retro_variable*)data;
+      struct retro_variable *v = reinterpret_cast<struct retro_variable*>(data);
       String::Utf8Value str(out->ToString());
-      var->value = *str;
+      v->value = *str;
       break;
     }
     case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY:
@@ -141,11 +150,11 @@ bool Environment_cb(unsigned cmd, void* data) {
     case RETRO_ENVIRONMENT_GET_USERNAME:
     case RETRO_ENVIRONMENT_GET_CORE_ASSETS_DIRECTORY: {
       String::Utf8Value str(out->ToString());
-      *(const char**)data = *str;
+      *reinterpret_cast<const char**>(data) = *str;
       break;
     }
     case RETRO_ENVIRONMENT_GET_LANGUAGE: {
-      *(unsigned*)data = out->Uint32Value();
+      *reinterpret_cast<unsigned*>(data) = out->Uint32Value();
       break;
     }
   }
@@ -153,61 +162,59 @@ bool Environment_cb(unsigned cmd, void* data) {
   return true;
 }
 
-void VideoRefresh(const void *data, unsigned width, unsigned height,
-  size_t pitch) {
-  if (data == NULL) {
-    return;
-  }
-  if (pitch == 0) {
-    pitch = 4 * width;
+void VideoRefresh(const void* data, unsigned w, unsigned h, size_t pitch) {
+  char* buffer = reinterpret_cast<char*>(malloc(h * w * bytes_per_pixel));
+  for (unsigned line = 0; line < h; line++) {
+    memcpy(buffer + line * w * bytes_per_pixel, reinterpret_cast<const char*>(data) + line * pitch, w * bytes_per_pixel);
   }
   Local<Value> args[] = {
-    NanNew<String>("videorefresh"),
-    NanNewBufferHandle((char*)data, height * pitch),
-    NanNew<Number>(width),
-    NanNew<Number>(height),
-    NanNew<Number>(pitch) };
-  listener->Call(5, args);
+    NanNew("videorefresh"),
+    ArrayBuffer::New(Isolate::GetCurrent(), buffer, h * w * bytes_per_pixel),
+    NanNew(w),
+    NanNew(h)
+  };
+  listener->Call(4, args);
 }
 
 void AudioSample(int16_t left, int16_t right) {
   Local<Value> args[] = {
-    NanNew<String>("audiosample"),
-    NanNew<Number>(left),
-    NanNew<Integer>(right)
+    NanNew("audiosample"),
+    NanNew(left),
+    NanNew(right)
   };
   listener->Call(3, args);
 }
 
 size_t AudioSampleBatch(const int16_t* data, size_t frames) {
-  // convert to floats for AudioContext
-  // maybe better to do this in Javascript.
-  float* newData = (float*) malloc(frames * 2 * sizeof(float));
-  for (size_t i = 0; i < frames * 2; i++) {
-    newData[i] = (float)data[i] / 0x8000;
+  float* left = reinterpret_cast<float*>(malloc(frames * 4));
+  float* right = reinterpret_cast<float*>(malloc(frames * 4));
+  for (size_t frame = 0; frame < frames; frame++) {
+    left[frame] = static_cast<float>(data[frame * 2]) / 0x8000;
+    right[frame] = static_cast<float>(data[frame * 2 + 1]) / 0x8000;
   }
   Local<Value> args[] = {
-    NanNew<String>("audiosamplebatch"),
-    NanNewBufferHandle((char*)newData, frames * 2 * sizeof(float)),
+    NanNew("audiosamplebatch"),
+    ArrayBuffer::New(Isolate::GetCurrent(), left, frames * 4),
+    ArrayBuffer::New(Isolate::GetCurrent(), right, frames * 4),
     NanNew<Number>(frames)
   };
-  return listener->Call(3, args)->Uint32Value();
+  return listener->Call(4, args)->Uint32Value();
 }
 
 void InputPoll() {
   Local<Value> args[] = {
-    NanNew<String>("inputpoll")
+    NanNew("inputpoll")
   };
   listener->Call(1, args);
 }
 
 int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
   Local<Value> args[] = {
-    NanNew<String>("inputstate"),
-    NanNew<Number>(port),
-    NanNew<Number>(device),
-    NanNew<Number>(idx),
-    NanNew<Number>(id)
+    NanNew("inputstate"),
+    NanNew(port),
+    NanNew(device),
+    NanNew(idx),
+    NanNew(id)
   };
   return listener->Call(5, args)->Uint32Value();
 }
@@ -216,19 +223,13 @@ NAN_METHOD(Listen) {
   listener = new NanCallback(Local<Function>::Cast(args[0]));
 }
 
-#define SYM(symbol) if (uv_dlsym(libretro, #symbol, (void**) &p##symbol)) { \
-  fprintf(stderr, "dlsym error: %s\n", uv_dlerror(libretro)); \
-  return; \
-}
+#define SYM(sym) uv_dlsym(libretro, #sym, reinterpret_cast<void**>(&p##sym));
 
 NAN_METHOD(LoadCore) {
   NanUtf8String path(args[0]);
 
-  uv_lib_t *libretro = (uv_lib_t*) malloc(sizeof(uv_lib_t));
-  if (uv_dlopen(*path, libretro)) {
-    fprintf(stderr, "dlsym error: %s\n", uv_dlerror(libretro));
-    return;
-  }
+  uv_lib_t* libretro = reinterpret_cast<uv_lib_t*>(malloc(sizeof(uv_lib_t)));
+  uv_dlopen(*path, libretro);
 
   SYM(retro_init);
   SYM(retro_deinit);
@@ -250,11 +251,11 @@ NAN_METHOD(LoadCore) {
   SYM(retro_serialize_size);
   SYM(retro_serialize);
   SYM(retro_unserialize);
-  SYM(retro_cheat_reset);  // unused
-  SYM(retro_cheat_set);  // unused
-  SYM(retro_load_game_special);  // unused
-  SYM(retro_get_memory_data); // unused
-  SYM(retro_get_memory_size); // unused
+  SYM(retro_cheat_reset);  // UNIMPLEMENTED
+  SYM(retro_cheat_set);  // UNIMPLEMENTED
+  SYM(retro_load_game_special);  // UNIMPLEMENTED
+  SYM(retro_get_memory_data);  // UNIMPLEMENTED
+  SYM(retro_get_memory_size);  // UNIMPLEMENTED
 
   pretro_set_environment(Environment_cb);
   pretro_init();
@@ -271,19 +272,19 @@ NAN_METHOD(Run) {
 
 uv_timer_t timer;
 
-void run_cb(uv_timer_t* handle) {
+void run(uv_timer_t* handle) {
   pretro_run();
 }
 
 void start_async(uv_work_t* request) {
   uv_timer_init(uv_default_loop(), &timer);
-  uv_timer_start(&timer, &run_cb, 0, *(uint32_t*)request->data);
+  uv_timer_start(&timer, &run, 0, *reinterpret_cast<uint32_t*>(request->data));
 }
 
 NAN_METHOD(Start) {
-  uint32_t* interval = (uint32_t*)malloc(4);
+  uint32_t* interval = reinterpret_cast<uint32_t*>(malloc(4));
   *interval = args[0]->Uint32Value();
-  uv_work_t* request = (uv_work_t*)malloc(sizeof(uv_work_t));
+  uv_work_t* request = reinterpret_cast<uv_work_t*>(malloc(sizeof(uv_work_t)));
   request->data = interval;
   uv_queue_work(uv_default_loop(), request, &start_async, NULL);
 }
@@ -297,42 +298,42 @@ NAN_METHOD(Reset) {
 }
 
 NAN_METHOD(APIVersion) {
-  NanReturnValue(NanNew<Integer>(pretro_api_version()));
+  NanReturnValue(NanNew(pretro_api_version()));
 }
 
 NAN_METHOD(GetRegion) {
-  NanReturnValue(NanNew<Number>(pretro_get_region()));
+  NanReturnValue(NanNew(pretro_get_region()));
 }
 
+#define SET(obj, i, attr) obj->Set(NanNew(#attr), NanNew(i.attr));
+
 NAN_METHOD(GetSystemInfo) {
-  NanScope();
   struct retro_system_info info;
   pretro_get_system_info(&info);
   Local<Object> object = NanNew<Object>();
-  object->Set(NanNew<String>("library_name"), NanNew<String>(info.library_name));
-  object->Set(NanNew<String>("library_version"), NanNew<String>(info.library_version));
-  object->Set(NanNew<String>("valid_extensions"), NanNew<String>(info.valid_extensions));
-  object->Set(NanNew<String>("need_fullpath"), NanNew<Boolean>(info.need_fullpath));
-  object->Set(NanNew<String>("block_extract"), NanNew<Number>(info.block_extract));
+  SET(object, info, library_name);
+  SET(object, info, library_version);
+  SET(object, info, valid_extensions);
+  SET(object, info, need_fullpath);
+  SET(object, info, block_extract);
   NanReturnValue(object);
 }
 
 NAN_METHOD(GetSystemAVInfo) {
-  NanScope();
   struct retro_system_av_info info;
   pretro_get_system_av_info(&info);
-  Local<Object> timing = NanNew<Object>();
-  timing->Set(NanNew<String>("fps"), NanNew<Number>(info.timing.fps));
-  timing->Set(NanNew<String>("sample_rate"), NanNew<Number>(info.timing.sample_rate));
-  Local<Object> geometry = NanNew<Object>();
-  geometry->Set(NanNew<String>("base_width"), NanNew<Number>(info.geometry.base_width));
-  geometry->Set(NanNew<String>("base_height"), NanNew<Number>(info.geometry.base_height));
-  geometry->Set(NanNew<String>("max_width"), NanNew<Number>(info.geometry.max_width));
-  geometry->Set(NanNew<String>("max_height"), NanNew<Number>(info.geometry.max_height));
-  geometry->Set(NanNew<String>("aspect_ratio"), NanNew<Number>(info.geometry.aspect_ratio));
   Local<Object> object = NanNew<Object>();
-  object->Set(NanNew<String>("timing"), timing);
-  object->Set(NanNew<String>("geometry"), geometry);
+  Local<Object> timing = NanNew<Object>();
+  SET(timing, info.timing, fps);
+  SET(timing, info.timing, sample_rate);
+  object->Set(NanNew("timing"), timing);
+  Local<Object> geometry = NanNew<Object>();
+  SET(geometry, info.geometry, base_width);
+  SET(geometry, info.geometry, base_height);
+  SET(geometry, info.geometry, max_width);
+  SET(geometry, info.geometry, max_height);
+  SET(geometry, info.geometry, aspect_ratio);
+  object->Set(NanNew("geometry"), geometry);
   NanReturnValue(object);
 }
 
@@ -359,24 +360,29 @@ NAN_METHOD(LoadGame) {
   pretro_load_game(&game);
 }
 
+NAN_METHOD(UnloadGame) {
+  pretro_unload_game();
+}
+
 NAN_METHOD(Serialize) {
   size_t size = pretro_serialize_size();
   void* memory = malloc(size);
   if (pretro_serialize(memory, size)) {
-    NanReturnValue(NanNewBufferHandle((char*)memory, size));
+    NanReturnValue(NanNewBufferHandle(reinterpret_cast<char*>(memory), size));
   }
 }
 
 NAN_METHOD(Unserialize) {
   Local<Object> buffer = args[0]->ToObject();
-  bool result = pretro_unserialize((void*)Buffer::Data(buffer), Buffer::Length(buffer));
-  NanReturnValue(NanNew<Boolean>(result));
+  void* data = reinterpret_cast<void*>(Buffer::Data(buffer));
+  NanReturnValue(NanNew(pretro_unserialize(data, Buffer::Length(buffer))));
 }
 
 void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "loadCore", LoadCore);
   NODE_SET_METHOD(exports, "loadGame", LoadGame);
   NODE_SET_METHOD(exports, "loadGamePath", LoadGamePath);
+  NODE_SET_METHOD(exports, "unloadGame", UnloadGame);
   NODE_SET_METHOD(exports, "getSystemInfo", GetSystemInfo);
   NODE_SET_METHOD(exports, "getSystemAVInfo", GetSystemAVInfo);
   NODE_SET_METHOD(exports, "unserialize", Unserialize);
