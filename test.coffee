@@ -21,7 +21,6 @@ for corename, coreinfo of cores
           core = c
           core.on 'videorefresh', (data, width, height) ->
             data.should.be.a.ArrayBuffer
-            new Uint16Array data
             width.should.be.a.Number
             height.should.be.a.Number
           core.on 'inputstate', (port, device, idx, id) ->
@@ -32,6 +31,7 @@ for corename, coreinfo of cores
           core.on 'audiosamplebatch', (left, right, frames) ->
             left.should.be.a.ArrayBuffer
             right.should.be.a.ArrayBuffer
+            frames.should.be.a.Number
           core.on 'environment', (cmd, value) ->
             cmd.should.be.a.Number
           done()
