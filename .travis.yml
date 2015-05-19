@@ -5,7 +5,6 @@ install:
   - npm install
 env:
   matrix:
-    - NODE_VERSION="0.10.38"
     - NODE_VERSION="0.12.2"
   global:
     - secure: al/Z4gRbJQUcRTAlq9T/ByrU4pLU/5gQfKa71PHwAFs8iJz0cwRgdnCWAdTF8vf4WPLzusAW6Jopa33Pe6z4du9RQ95Mg1J6/3jjyZJsrl7qF2Cc6zjywaQvrHWcU1gBR6phqRAQCjfbpH1jucqPYr3q8SuFAT9AuwIMua0b42Q=
