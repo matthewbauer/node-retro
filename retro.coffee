@@ -48,7 +48,10 @@ module.exports.getCore = (core) ->
     else
       platform = switch process.platform
         when 'win32'
-          'win-x86_64_w32'
+          if process.arch is 'ia32'
+            'win-x86'
+          else
+            'win-x86_64_w32'
         when 'darwin'
           if process.arch is 'ia32'
             'osx-x86'
