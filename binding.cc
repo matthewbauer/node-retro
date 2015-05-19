@@ -218,12 +218,15 @@ int16_t InputState(unsigned port, unsigned device, unsigned idx, unsigned id) {
 }
 
 NAN_METHOD(Listen) {
+  NanScope();
   listener = new NanCallback(Local<Function>::Cast(args[0]));
+  NanReturnUndefined();
 }
 
 #define SYM(sym) uv_dlsym(libretro, #sym, reinterpret_cast<void**>(&p##sym));
 
 NAN_METHOD(LoadCore) {
+  NanScope();
   NanUtf8String path(args[0]);
 
   uv_lib_t* libretro = reinterpret_cast<uv_lib_t*>(malloc(sizeof(uv_lib_t)));
@@ -262,10 +265,14 @@ NAN_METHOD(LoadCore) {
   pretro_set_audio_sample_batch(AudioSampleBatch);
   pretro_set_input_poll(InputPoll);
   pretro_set_input_state(InputState);
+
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Run) {
+  NanScope();
   pretro_run();
+  NanReturnUndefined();
 }
 
 uv_timer_t timer;
@@ -280,32 +287,41 @@ void start_async(uv_work_t* request) {
 }
 
 NAN_METHOD(Start) {
+  NanScope();
   uint32_t* interval = reinterpret_cast<uint32_t*>(malloc(4));
   *interval = args[0]->Uint32Value();
   uv_work_t* request = reinterpret_cast<uv_work_t*>(malloc(sizeof(uv_work_t)));
   request->data = interval;
   uv_queue_work(uv_default_loop(), request, &start_async, NULL);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Stop) {
+  NanScope();
   uv_timer_stop(&timer);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Reset) {
+  NanScope();
   pretro_reset();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(APIVersion) {
+  NanScope();
   NanReturnValue(NanNew(pretro_api_version()));
 }
 
 NAN_METHOD(GetRegion) {
+  NanScope();
   NanReturnValue(NanNew(pretro_get_region()));
 }
 
 #define SET(obj, i, attr) obj->Set(NanNew(#attr), NanNew(i.attr));
 
 NAN_METHOD(GetSystemInfo) {
+  NanScope();
   struct retro_system_info info;
   pretro_get_system_info(&info);
   Local<Object> object = NanNew<Object>();
@@ -318,6 +334,7 @@ NAN_METHOD(GetSystemInfo) {
 }
 
 NAN_METHOD(GetSystemAVInfo) {
+  NanScope();
   struct retro_system_av_info info;
   pretro_get_system_av_info(&info);
   Local<Object> object = NanNew<Object>();
@@ -336,6 +353,7 @@ NAN_METHOD(GetSystemAVInfo) {
 }
 
 NAN_METHOD(LoadGamePath) {
+  NanScope();
   NanUtf8String path(args[0]);
   struct retro_game_info game;
   game.path = *path;
@@ -348,21 +366,27 @@ NAN_METHOD(LoadGamePath) {
   game.data = buffer;
   fclose(fp);
   pretro_load_game(&game);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(LoadGame) {
+  NanScope();
   struct retro_game_info game;
   Local<Object> bufferObj = args[0]->ToObject();
   game.size = Buffer::Length(bufferObj);
   game.data = Buffer::Data(bufferObj);
   pretro_load_game(&game);
+  NanReturnUndefined();
 }
 
 NAN_METHOD(UnloadGame) {
+  NanScope();
   pretro_unload_game();
+  NanReturnUndefined();
 }
 
 NAN_METHOD(Serialize) {
+  NanScope();
   size_t size = pretro_serialize_size();
   void* memory = malloc(size);
   if (pretro_serialize(memory, size)) {
@@ -371,6 +395,7 @@ NAN_METHOD(Serialize) {
 }
 
 NAN_METHOD(Unserialize) {
+  NanScope();
   Local<Object> buffer = args[0]->ToObject();
   void* data = reinterpret_cast<void*>(Buffer::Data(buffer));
   NanReturnValue(NanNew(pretro_unserialize(data, Buffer::Length(buffer))));

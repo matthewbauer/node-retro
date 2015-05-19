@@ -63,9 +63,9 @@ for corename, coreinfo of cores
       if coreinfo.roms
         for rom in coreinfo.roms
           do (rom) ->
-            it "running #{rom.nointro_name} for 10 frames", (done) ->
+            it "running #{rom.nointro_name} for 5 frames", (done) ->
               nointro.getROM rom
               .then (buffer) ->
                 core.loadGame buffer
-                core.run() for a in [1..10]
+                core.run() for a in [1..5]
                 done()
