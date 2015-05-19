@@ -14,7 +14,6 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "node-arraybuffer": "^1.0.7",
     "node-pre-gyp": "^0.6.4",
     "request": "^2.55.0",
     "unzip": "^0.1.11"
