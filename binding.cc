@@ -43,8 +43,7 @@ bool (*pretro_unserialize)(const void*, size_t);
 void (*pretro_cheat_reset)(void);
 void (*pretro_cheat_set)(unsigned, bool, const char*);
 bool (*pretro_load_game)(const struct retro_game_info*);
-bool (*pretro_load_game_special)(unsigned,
-  const struct retro_game_info*, size_t);
+bool (*pretro_load_game_special)(unsigned, const struct retro_game_info*, size_t);
 void (*pretro_unload_game)(void);
 unsigned (*pretro_get_region)(void);
 void *(*pretro_get_memory_data)(unsigned);

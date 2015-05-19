@@ -1,4 +1,4 @@
-retro = require './retro.js'
+retro = require './retro'
 should = require 'should'
 nointro = require 'gametime-nointro'
 
