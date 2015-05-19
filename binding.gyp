@@ -8,8 +8,7 @@
             "target_name": "<(module_name)",
             "sources": ["binding.cc"],
             "include_dirs": [
-                "<!(node -p -e \"require('path').dirname(require.resolve('nan'))\")",
-                "<!(node -e \"require('node-arraybuffer')\")"
+                "<!(node -p -e \"require('path').dirname(require.resolve('nan'))\")"
             ]
         },
         {
