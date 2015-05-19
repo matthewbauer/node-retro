@@ -21,7 +21,7 @@ gulp.task 'install', shell.task [
   'node-pre-gyp install --fallback-to-build'
 ]
 gulp.task 'publish', shell.task [
-  'node-pre-gyp package publish'
+  'node-pre-gyp package unpublish publish'
 ]
 gulp.task 'build', ['gyp', 'coffee']
 gulp.task 'travis', ['build', 'test', 'publish']
