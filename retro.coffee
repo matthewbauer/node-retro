@@ -51,7 +51,7 @@ module.exports.getCore = (core) ->
           if process.arch is 'ia32'
             'win-x86'
           else
-            'win-x86_64'
+            'win-x86_64_w32'
         when 'darwin'
           if process.arch is 'ia32'
             'osx-x86'
