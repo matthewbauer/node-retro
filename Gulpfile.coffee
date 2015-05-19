@@ -15,10 +15,10 @@ gulp.task 'mocha', ['gyp', 'coffee'], ->
     globals:
       should: require 'should'
 gulp.task 'gyp', shell.task [
-  './node_modules/.bin/node-pre-gyp build'
+  'node-pre-gyp configure build'
 ]
 gulp.task 'install', shell.task [
-  './node_modules/.bin/node-pre-gyp install --fallback-to-build'
+  'node-pre-gyp install --fallback-to-build'
 ]
 
 gulp.task 'build', ['gyp', 'coffee']
