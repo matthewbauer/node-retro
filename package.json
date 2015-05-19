@@ -10,7 +10,7 @@
   "main": "retro.js",
   "scripts": {
     "prepublish": "gulp prepublish",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "node-pre-gyp install --fallback-to-build --msvs_version=2013",
     "test": "gulp test"
   },
   "dependencies": {
