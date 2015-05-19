@@ -1,7 +1,7 @@
 {
     "variables": {
         "module_name": "retro",
-        "module_path": "./lib/binding/Release/node-v43-darwin-x64"
+        "module_path": "./lib/binding/"
     },
     "targets": [
         {
