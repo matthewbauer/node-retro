@@ -15,13 +15,16 @@ gulp.task 'mocha', ['gyp', 'coffee'], ->
     globals:
       should: require 'should'
 gulp.task 'gyp', shell.task [
-  './node_modules/.bin/node-pre-gyp build'
+  'node-pre-gyp --msvs_version=2012 configure build'
 ]
 gulp.task 'install', shell.task [
-  './node_modules/.bin/node-pre-gyp install --fallback-to-build'
+  'node-pre-gyp install --fallback-to-build'
 ]
-
+gulp.task 'publish', shell.task [
+  'node-pre-gyp package publish'
+]
 gulp.task 'build', ['gyp', 'coffee']
+gulp.task 'travis', ['build', 'test', 'publish']
 gulp.task 'test', ['mocha']
 gulp.task 'prepublish', ['build']
 gulp.task 'default', ['build', 'test']

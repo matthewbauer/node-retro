@@ -14,21 +14,22 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "nan": "^1.7.0",
-    "node-arraybuffer": "^1.0.7",
     "node-pre-gyp": "^0.6.4",
     "request": "^2.55.0",
     "unzip": "^0.1.11"
   },
   "binary": {
     "module_name": "retro",
-    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
-    "host": ""
+    "module_path": "./lib/binding/",
+    "host": "https://node-retro.s3-us-west-2.amazonaws.com",
+    "remote_path": "./{name}/v{version}"
   },
   "bundledDependencies": [
     "node-pre-gyp"
   ],
   "devDependencies": {
+    "nan": "^1.7.0",
+    "aws-sdk": "^2.1.29",
     "coffee-script": "^1.9.2",
     "gametime-nointro": "^0.5.1",
     "gulp": "^3.8.11",
