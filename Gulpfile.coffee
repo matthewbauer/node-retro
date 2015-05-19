@@ -15,7 +15,7 @@ gulp.task 'mocha', ['gyp', 'coffee'], ->
     globals:
       should: require 'should'
 gulp.task 'gyp', shell.task [
-  'node-pre-gyp configure build'
+  'node-pre-gyp --msvs_version=2012 configure build'
 ]
 gulp.task 'install', shell.task [
   'node-pre-gyp install --fallback-to-build'
