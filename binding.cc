@@ -13,13 +13,13 @@ using v8::Isolate;
 using v8::Value;
 using v8::Local;
 using v8::String;
-using v8::ArrayBuffer;
 using v8::Function;
 using v8::Object;
 using v8::Number;
 using v8::Handle;
 using v8::Integer;
 using v8::Boolean;
+using v8::ArrayBuffer; // not support in node 0.10!
 using namespace node;
 
 // core methods, not included in libretro.h?
@@ -223,14 +223,18 @@ NAN_METHOD(Listen) {
   NanReturnUndefined();
 }
 
-#define SYM(sym) uv_dlsym(libretro, #sym, reinterpret_cast<void**>(&p##sym));
+#define SYM(sym) if (uv_dlsym(libretro, #sym, reinterpret_cast<void**>(&p##sym))) { \
+  return NanThrowError("retro.LoadCore: Could not link " #sym "."); \
+}
 
 NAN_METHOD(LoadCore) {
   NanScope();
   NanUtf8String path(args[0]);
 
   uv_lib_t* libretro = reinterpret_cast<uv_lib_t*>(malloc(sizeof(uv_lib_t)));
-  uv_dlopen(*path, libretro);
+  if (uv_dlopen(*path, libretro)) {
+    return NanThrowError("retro.LoadCore: Shared library not found.");
+  }
 
   SYM(retro_init);
   SYM(retro_deinit);
