@@ -11,7 +11,7 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - npm install
   - SET PATH=node_modules\.bin;%PATH%
-  - node-pre-gyp --msvs_version=2013 package publish
+  - node-pre-gyp --msvs_version=2013 package unpublish publish
 test_script:
   - npm test
 build: off
