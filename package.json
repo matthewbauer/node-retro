@@ -14,7 +14,6 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "nan": "^1.7.0",
     "node-arraybuffer": "^1.0.7",
     "node-pre-gyp": "^0.6.4",
     "request": "^2.55.0",
@@ -30,6 +29,7 @@
     "node-pre-gyp"
   ],
   "devDependencies": {
+    "nan": "^1.7.0",
     "aws-sdk": "^2.1.29",
     "coffee-script": "^1.9.2",
     "gametime-nointro": "^0.5.1",
