@@ -17,6 +17,7 @@ for corename, coreinfo of cores
     describe "retro.getCore('#{corename}')", ->
       core = null
       before (done) ->
+        this.timeout 4000
         retro.getCore(corename).then (c) ->
           core = c
           core.on 'videorefresh', (data, width, height) ->
@@ -64,6 +65,7 @@ for corename, coreinfo of cores
         for rom in coreinfo.roms
           do (rom) ->
             it "running #{rom.nointro_name} for 5 frames", (done) ->
+              this.timeout 4000
               nointro.getROM rom
               .then (buffer) ->
                 core.loadGame buffer
