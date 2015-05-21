@@ -1,7 +1,7 @@
 {
   "name": "node-retro",
   "description": "Load libretro cores within Javascript.",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "author": "Matthew Bauer <mjbauer95@gmail.com>",
   "repository": {
     "type": "git",
@@ -10,7 +10,6 @@
   "main": "retro.js",
   "scripts": {
     "prepublish": "gulp prepublish",
-    "install": "node-pre-gyp install --fallback-to-build --msvs_version=2013",
     "test": "gulp test"
   },
   "dependencies": {
@@ -24,9 +23,6 @@
     "host": "https://node-retro.s3-us-west-2.amazonaws.com",
     "remote_path": "./{name}/v{version}"
   },
-  "bundledDependencies": [
-    "node-pre-gyp"
-  ],
   "devDependencies": {
     "nan": "^1.7.0",
     "aws-sdk": "^2.1.29",
