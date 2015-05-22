@@ -1,7 +1,7 @@
 {
   "name": "node-retro",
   "description": "Load libretro cores within Javascript.",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "author": "Matthew Bauer <mjbauer95@gmail.com>",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
   "dependencies": {
     "nan": "^1.8.4",
     "node-gyp": "^1.0.3",
+    "node-pre-gyp": "^0.6.7",
     "request": "^2.55.0",
     "unzip": "^0.1.11"
   },
