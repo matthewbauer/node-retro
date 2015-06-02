@@ -1,7 +1,7 @@
 {
   "name": "node-retro",
   "description": "Load libretro cores within Javascript.",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "author": "Matthew Bauer <mjbauer95@gmail.com>",
   "repository": {
     "type": "git",
@@ -15,9 +15,7 @@
   "dependencies": {
     "nan": "^1.8.4",
     "node-gyp": "^1.0.3",
-    "node-pre-gyp": "^0.6.7",
-    "request": "^2.55.0",
-    "unzip": "^0.1.11"
+    "node-pre-gyp": "^0.6.7"
   },
   "binary": {
     "module_name": "retro",
@@ -34,7 +32,9 @@
     "gulp-mocha": "^2.0.1",
     "gulp-shell": "^0.4.1",
     "gulp-util": "^3.0.4",
-    "should": "^6.0.1"
+    "should": "^6.0.1",
+    "request": "^2.55.0",
+    "unzip": "^0.1.11"
   },
   "keywords": [
     "emulation",

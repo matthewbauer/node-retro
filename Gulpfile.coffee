@@ -5,11 +5,11 @@ mocha = require 'gulp-mocha'
 shell = require 'gulp-shell'
 
 gulp.task 'coffee', ->
-  gulp.src(['retro.coffee', 'libretro_h.coffee'])
+  gulp.src(['retro.coffee', 'get-core.coffee', 'libretro_h.coffee'])
   .pipe(coffee())
   .pipe(gulp.dest '.')
 gulp.task 'mocha', ['gyp', 'coffee'], ->
-  gulp.src(['test.coffee'], read: false)
+  gulp.src('spec/*.coffee', read: false)
   .pipe mocha
     reporter: 'spec',
     globals:

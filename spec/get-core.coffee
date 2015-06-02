@@ -1,6 +1,6 @@
-retro = require './retro'
 should = require 'should'
 nointro = require 'gametime-nointro'
+getCore = require '../get-core'
 
 cores =
   snes9x_libretro:
@@ -17,8 +17,8 @@ for corename, coreinfo of cores
     describe "retro.getCore('#{corename}')", ->
       core = null
       before (done) ->
-        this.timeout 4000
-        retro.getCore(corename).then (c) ->
+        @timeout 20000
+        getCore(corename).then (c) ->
           core = c
           core.on 'videorefresh', (data, width, height) ->
             data.should.be.a.ArrayBuffer
@@ -65,7 +65,6 @@ for corename, coreinfo of cores
         for rom in coreinfo.roms
           do (rom) ->
             it "running #{rom.nointro_name} for 5 frames", (done) ->
-              this.timeout 4000
               nointro.getROM rom
               .then (buffer) ->
                 core.loadGame buffer

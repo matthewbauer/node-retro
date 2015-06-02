@@ -19,8 +19,7 @@ using v8::Number;
 using v8::Handle;
 using v8::Integer;
 using v8::Boolean;
-using v8::ArrayBuffer; // not support in node 0.10!
-using namespace node;
+using v8::ArrayBuffer;  // not support in node 0.10!
 
 // core methods, not included in libretro.h?
 void (*pretro_init)(void);
@@ -377,8 +376,8 @@ NAN_METHOD(LoadGame) {
   NanScope();
   struct retro_game_info game;
   Local<Object> bufferObj = args[0]->ToObject();
-  game.size = Buffer::Length(bufferObj);
-  game.data = Buffer::Data(bufferObj);
+  game.size = node::Buffer::Length(bufferObj);
+  game.data = node::Buffer::Data(bufferObj);
   pretro_load_game(&game);
   NanReturnUndefined();
 }
@@ -401,8 +400,8 @@ NAN_METHOD(Serialize) {
 NAN_METHOD(Unserialize) {
   NanScope();
   Local<Object> buffer = args[0]->ToObject();
-  void* data = reinterpret_cast<void*>(Buffer::Data(buffer));
-  NanReturnValue(NanNew(pretro_unserialize(data, Buffer::Length(buffer))));
+  void* data = reinterpret_cast<void*>(node::Buffer::Data(buffer));
+  NanReturnValue(NanNew(pretro_unserialize(data, node::Buffer::Length(buffer))));
 }
 
 void InitAll(Handle<Object> exports) {
