@@ -4,7 +4,6 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-
 #include <string>
 
 #include "./libretro.h"
@@ -388,6 +387,12 @@ NAN_METHOD(UnloadGame) {
   NanReturnUndefined();
 }
 
+NAN_METHOD(UnloadCore) {
+  NanScope();
+  pretro_deinit();
+  NanReturnUndefined();
+}
+
 NAN_METHOD(Serialize) {
   NanScope();
   size_t size = pretro_serialize_size();
@@ -420,6 +425,7 @@ void InitAll(Handle<Object> exports) {
   NODE_SET_METHOD(exports, "run", Run);
   NODE_SET_METHOD(exports, "start", Start);
   NODE_SET_METHOD(exports, "stop", Stop);
+  NODE_SET_METHOD(exports, "unloadCore", UnloadCore);
 }
 
 NODE_MODULE(addon, InitAll)

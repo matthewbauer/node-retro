@@ -5,7 +5,7 @@ mocha = require 'gulp-mocha'
 shell = require 'gulp-shell'
 
 gulp.task 'coffee', ->
-  gulp.src(['retro.coffee', 'get-core.coffee', 'libretro_h.coffee'])
+  gulp.src(['retro.coffee', 'libretro_h.coffee'])
   .pipe(coffee())
   .pipe(gulp.dest '.')
 gulp.task 'mocha', ['gyp', 'coffee'], ->
@@ -15,7 +15,7 @@ gulp.task 'mocha', ['gyp', 'coffee'], ->
     globals:
       should: require 'should'
 gulp.task 'gyp', shell.task [
-  'node-pre-gyp --msvs_version=2012 configure build'
+  'node-pre-gyp configure build'
 ]
 gulp.task 'install', shell.task [
   'node-pre-gyp install --fallback-to-build'
