@@ -8,10 +8,10 @@ gulp.task 'coffee', ->
   gulp.src(['retro.coffee', 'libretro_h.coffee'])
   .pipe(coffee())
   .pipe(gulp.dest '.')
+require 'coffee-coverage/register-istanbul'
 gulp.task 'mocha', ['gyp', 'coffee'], ->
   gulp.src('spec/*.coffee', read: false)
   .pipe mocha
-    reporter: 'spec',
     globals:
       should: require 'should'
 gulp.task 'gyp', shell.task [

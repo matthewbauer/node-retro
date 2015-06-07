@@ -1,5 +1,3 @@
-should = require 'should'
-
 nointro = require 'gametime-nointro'
 {getCore} = require 'gametime-retro'
 {Core} = require '../retro'
