@@ -10,3 +10,5 @@ env:
     - secure: al/Z4gRbJQUcRTAlq9T/ByrU4pLU/5gQfKa71PHwAFs8iJz0cwRgdnCWAdTF8vf4WPLzusAW6Jopa33Pe6z4du9RQ95Mg1J6/3jjyZJsrl7qF2Cc6zjywaQvrHWcU1gBR6phqRAQCjfbpH1jucqPYr3q8SuFAT9AuwIMua0b42Q=
     - secure: Hl8CCgX6uDkdQIfUibNLJHEE76VcSTeiwwX2oeAoVGGqcv4Enq+LvGHgmDElCSQgeLq41YPt1MwPpyEoSmgm62Kmrok1tK4s2qHNDnutjDuo0QnVEdADSenxm7uIIu5D3/bOYoUrzL7e6ZjnHdI2NevDKZl0GVuHZn8tObH0rIs=
 script: gulp travis
+after_success:
+  npm run coveralls
