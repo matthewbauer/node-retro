@@ -63,6 +63,7 @@ for corename, coreinfo of cores
     for rom in coreinfo.roms
       do (rom) ->
         describe "loading #{rom.nointro_name}", ->
+          @timeout 4000
           it "running #{rom.nointro_name} for 50 frames", (done) ->
             getCore(corename).then (path) ->
               core = new Core path
