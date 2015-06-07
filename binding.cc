@@ -375,6 +375,7 @@ NAN_METHOD(LoadGame) {
   NanScope();
   struct retro_game_info game;
   Local<Object> bufferObj = args[0]->ToObject();
+  // TODO: use typed arrays
   game.size = node::Buffer::Length(bufferObj);
   game.data = node::Buffer::Data(bufferObj);
   pretro_load_game(&game);
@@ -398,12 +399,14 @@ NAN_METHOD(Serialize) {
   size_t size = pretro_serialize_size();
   void* memory = malloc(size);
   if (pretro_serialize(memory, size)) {
+    // TODO: use typed arrays
     NanReturnValue(NanNewBufferHandle(reinterpret_cast<char*>(memory), size));
   }
 }
 
 NAN_METHOD(Unserialize) {
   NanScope();
+  // TODO: use typed arrays
   Local<Object> buffer = args[0]->ToObject();
   void* data = reinterpret_cast<void*>(node::Buffer::Data(buffer));
   NanReturnValue(NanNew(pretro_unserialize(data, node::Buffer::Length(buffer))));

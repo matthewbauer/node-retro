@@ -6,3 +6,7 @@ npm-debug.log
 examples
 *.coffee
 coverage
+.coverrun
+.coverdata
+debug
+coverage.html
