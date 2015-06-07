@@ -9,6 +9,7 @@ cores =
     roms: [
       nointro_name: 'Super Mario World (USA)'
       nointro_console: 'Nintendo - Super Nintendo Entertainment System'
+      file_name: 'Super Mario World (USA).sfc'
     ]
 
 for corename, coreinfo of cores
@@ -85,4 +86,5 @@ for corename, coreinfo of cores
                 core.run() for a in [1..5]
                 save = core.serialize()
                 save.should.exist
+                save.should.be.a.Buffer
                 done()
