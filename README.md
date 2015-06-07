@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/matthewbauer/node-retro.png?label=ready&title=Ready)](https://waffle.io/matthewbauer/node-retro)
 node-retro [![Build Status](https://travis-ci.org/matthewbauer/node-retro.svg?branch=master)](https://travis-ci.org/matthewbauer/node-retro)
 ============================================================================================================================================
 
