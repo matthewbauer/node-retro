@@ -1,3 +1,4 @@
+should = require 'should'
 nointro = require 'gametime-nointro'
 {getCore} = require 'gametime-retro'
 {Core} = require '../retro'
@@ -63,7 +64,7 @@ for corename, coreinfo of cores
     for rom in coreinfo.roms
       do (rom) ->
         describe "loading #{rom.nointro_name}", ->
-          @timeout 4000
+          @timeout 40000
           it "running #{rom.nointro_name} for 50 frames", (done) ->
             getCore(corename).then (path) ->
               core = new Core path

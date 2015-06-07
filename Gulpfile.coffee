@@ -11,9 +11,7 @@ gulp.task 'coffee', ->
 require 'coffee-coverage/register-istanbul'
 gulp.task 'mocha', ['gyp', 'coffee'], ->
   gulp.src('spec/*.coffee', read: false)
-  .pipe mocha
-    globals:
-      should: require 'should'
+  .pipe mocha()
 gulp.task 'gyp', shell.task [
   'node-pre-gyp configure build'
 ]
