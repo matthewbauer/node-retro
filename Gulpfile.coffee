@@ -5,12 +5,12 @@ mocha = require 'gulp-mocha'
 shell = require 'gulp-shell'
 
 gulp.task 'coffee', ->
-  gulp.src(['retro.coffee', 'libretro_h.coffee'])
-  .pipe(coffee())
-  .pipe(gulp.dest '.')
+  gulp.src ['retro.coffee', 'libretro_h.coffee']
+  .pipe coffee()
+  .pipe gulp.dest '.'
 require 'coffee-coverage/register-istanbul'
 gulp.task 'mocha', ['gyp', 'coffee'], ->
-  gulp.src('spec/*.coffee', read: false)
+  gulp.src 'spec/*.coffee'
   .pipe mocha()
 gulp.task 'gyp', shell.task [
   'node-pre-gyp configure build'

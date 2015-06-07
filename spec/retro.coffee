@@ -17,7 +17,8 @@ for corename, coreinfo of cores
       core = null
       before (done) ->
         @timeout 20000
-        getCore(corename).then (path) ->
+        getCore corename
+        .then (path) ->
           core = new Core path
           done()
       it "register handlers...", ->
@@ -64,9 +65,9 @@ for corename, coreinfo of cores
     for rom in coreinfo.roms
       do (rom) ->
         describe "loading #{rom.nointro_name}", ->
-          @timeout 40000
           it "running #{rom.nointro_name} for 50 frames", (done) ->
-            getCore(corename).then (path) ->
+            getCore corename
+            .then (path) ->
               core = new Core path
               nointro.getROM rom
               .then (buffer) ->
@@ -75,7 +76,8 @@ for corename, coreinfo of cores
                 core.unloadGame()
                 done()
           it "saving state...", (done) ->
-            getCore(corename).then (path) ->
+            getCore corename
+            .then (path) ->
               core = new Core path
               nointro.getROM rom
               .then (buffer) ->
