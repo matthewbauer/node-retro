@@ -1,6 +1,4 @@
 # node-retro JS wrapper
-module.exports = require './libretro_h'
-
 path = require 'path'
 
 binary = require 'node-pre-gyp'
