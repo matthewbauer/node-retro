@@ -1,6 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/matthewbauer/node-retro.png?label=ready&title=Ready)](https://waffle.io/matthewbauer/node-retro)
-node-retro [![Build Status](https://travis-ci.org/matthewbauer/node-retro.svg?branch=master)](https://travis-ci.org/matthewbauer/node-retro)
-============================================================================================================================================
+# node-retro [![Build Status](https://travis-ci.org/matthewbauer/node-retro.svg?branch=master)](https://travis-ci.org/matthewbauer/node-retro) [![Stories in Ready](https://badge.waffle.io/matthewbauer/node-retro.png?label=ready&title=Ready)](https://waffle.io/matthewbauer/node-retro)
 
 Use node-retro to run libretro cores from within node. This is used by gametime-player to load cores for emulation.
 
